@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_firebase_blog_app/data/model/post.dart';
 import 'package:flutter_firebase_blog_app/ui/detail/detail_page.dart';
+import 'package:flutter_firebase_blog_app/ui/home/home_view_model.dart';
 import 'package:flutter_firebase_blog_app/ui/write/write_page.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class HomePage extends StatelessWidget {
   @override
@@ -15,7 +18,7 @@ class HomePage extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => WritePage(),
+                builder: (context) => WritePage(null),
               ),
             );
           },
@@ -33,26 +36,34 @@ class HomePage extends StatelessWidget {
               SizedBox(
                 height: 20,
               ),
-              Expanded(
-                child: ListView.separated(
-                  itemCount: 10,
-                  itemBuilder: (context, index) => item(),
-                  separatorBuilder: (context, index) => SizedBox(
-                    height: 10,
-                  ),
-                ),
+              Consumer(
+                builder: (context, ref, child) {
+                  final posts = ref.watch(homeViewModelProvider);
+                  return Expanded(
+                    child: ListView.separated(
+                      itemCount: posts.length,
+                      itemBuilder: (context, index) {
+                        final post = posts[index];
+                        return item(post);
+                      },
+                      separatorBuilder: (context, index) => SizedBox(
+                        height: 10,
+                      ),
+                    ),
+                  );
+                },
               ),
             ],
           ),
         ));
   }
 
-  Widget item() {
+  Widget item(Post post) {
     return Builder(builder: (context) {
       return GestureDetector(
         onTap: () {
-          Navigator.push(
-              context, MaterialPageRoute(builder: (context) => DetailPage()));
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => DetailPage(post)));
         },
         child: Container(
           width: double.infinity,
@@ -66,7 +77,7 @@ class HomePage extends StatelessWidget {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(20),
                   child: Image.network(
-                    'https://picsum.photos/200/300',
+                    post.imageUrl,
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -84,13 +95,13 @@ class HomePage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'data',
+                      post.title,
                       style:
                           TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                     ),
                     Spacer(),
                     Text(
-                      'dighdighdighdighdighdighdighdighdighdighdighdighdighdighdigh',
+                      post.content,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(color: Colors.grey, fontSize: 12),
                     ),
@@ -98,7 +109,7 @@ class HomePage extends StatelessWidget {
                       height: 4,
                     ),
                     Text(
-                      '2024/12/03 : 13:01:05',
+                      post.createAt.toIso8601String(),
                       style: TextStyle(color: Colors.grey, fontSize: 12),
                     ),
                   ],

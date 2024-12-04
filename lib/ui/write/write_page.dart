@@ -1,16 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_firebase_blog_app/data/model/post.dart';
+import 'package:flutter_firebase_blog_app/ui/write/write_view_model.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class WritePage extends StatefulWidget {
-  const WritePage({super.key});
-
+class WritePage extends ConsumerStatefulWidget {
+  WritePage(this.post);
+  Post? post;
   @override
-  State<WritePage> createState() => _WritePageState();
+  ConsumerState<WritePage> createState() => _WritePageState();
 }
 
-class _WritePageState extends State<WritePage> {
-  TextEditingController writeController = TextEditingController();
-  TextEditingController titleController = TextEditingController();
-  TextEditingController contentController = TextEditingController();
+class _WritePageState extends ConsumerState<WritePage> {
+  late TextEditingController writeController = TextEditingController(
+    text: widget.post?.writer ?? '',
+  );
+  late TextEditingController titleController = TextEditingController(
+    text: widget.post?.title ?? '',
+  );
+  late TextEditingController contentController = TextEditingController(
+    text: widget.post?.content ?? '',
+  );
 
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
@@ -24,6 +33,16 @@ class _WritePageState extends State<WritePage> {
 
   @override
   Widget build(BuildContext context) {
+    final writeState = ref.watch(writeViewModelProvider(widget.post));
+    if (writeState.isWriting) {
+      return Scaffold(
+        appBar: AppBar(),
+        body: Center(
+          child: Center(child: CircularProgressIndicator()),
+        ),
+      );
+    }
+
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();
@@ -32,8 +51,19 @@ class _WritePageState extends State<WritePage> {
         appBar: AppBar(
           actions: [
             GestureDetector(
-              onTap: () {
+              onTap: () async {
                 final result = formKey.currentState?.validate() ?? false;
+                if (result) {
+                  final vm =
+                      ref.read(writeViewModelProvider(widget.post).notifier);
+                  final insertResult = await vm.insert(
+                      writer: writeController.text,
+                      title: titleController.text,
+                      content: contentController.text);
+                  if (insertResult) {
+                    Navigator.pop(context);
+                  }
+                }
               },
               child: Container(
                 width: 50,

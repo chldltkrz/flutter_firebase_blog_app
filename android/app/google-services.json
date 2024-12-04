@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "766635303328",
+    "project_id": "flutter-blog-app-a8a2a",
+    "storage_bucket": "flutter-blog-app-a8a2a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:766635303328:android:36368715d911bcd97f04c5",
+        "android_client_info": {
+          "package_name": "com.example.flutter_firebase_blog_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAt6qXQTVzRkec-jFN70EF28SHag7UpwHY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

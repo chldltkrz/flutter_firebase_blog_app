@@ -1,18 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_firebase_blog_app/data/model/post.dart';
+import 'package:flutter_firebase_blog_app/ui/detail/detail_view_model.dart';
 import 'package:flutter_firebase_blog_app/ui/write/write_page.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class DetailPage extends StatelessWidget {
+class DetailPage extends ConsumerWidget {
+  DetailPage(this.post);
+  Post post;
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(detailViewModelProvider(post));
+
     return Scaffold(
         appBar: AppBar(
           actions: [
-            iconButton(Icons.delete, () {}),
+            iconButton(Icons.delete, () async {
+              final vm = ref.read(detailViewModelProvider(post).notifier);
+              final result = await vm.deletePost();
+              if (result) {
+                Navigator.pop(context);
+              }
+            }),
             iconButton(Icons.edit, () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => WritePage(),
+                  builder: (context) => WritePage(post),
                 ),
               );
             }),
@@ -22,7 +35,7 @@ class DetailPage extends StatelessWidget {
           padding: EdgeInsets.only(bottom: 500),
           children: [
             Image.network(
-              'https://picsum.photos/200/300',
+              state.imageUrl,
               fit: BoxFit.cover,
             ),
             SizedBox(height: 20),
@@ -32,23 +45,23 @@ class DetailPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "TIU",
+                    state.title,
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                   ),
                   SizedBox(height: 14),
                   Text(
-                    "작성자: TIU",
+                    "작성자: ${state.writer}",
                     style: TextStyle(fontSize: 16),
                   ),
                   Text(
-                    "2024-12-03",
+                    state.createAt.toIso8601String(),
                     style: TextStyle(fontWeight: FontWeight.w200, fontSize: 14),
                   ),
                   SizedBox(
                     height: 14,
                   ),
                   Text(
-                    "Flutter Google Firebase Blog App" * 100,
+                    state.content,
                     style: TextStyle(fontSize: 16),
                   ),
                 ],
